@@ -586,18 +586,11 @@ trackingForm.addEventListener("submit", (event) => {
 
   periods.push({ id, start, end });
 
-  if (!savePeriods(periods)) {
-    trackingMessage.textContent =
-      "Could not save your record. Please check your browser storage.";
-    return;
-  }
+ const settings = getSettings();
+settings.lastPeriod = start;
+saveSettings(settings);
+lastPeriodInput.value = start;
 
-  if (!updateLastPeriod(start)) {
-    trackingMessage.textContent =
-      "Your record was saved, but your cycle settings could not be updated.";
-    renderPeriodHistory();
-    return;
-  }
 
   trackingMessage.textContent = "Your period record has been saved! 🌸";
 
