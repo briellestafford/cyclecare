@@ -145,6 +145,18 @@ function saveSettings(settings) {
   }
 }
 
+function updateLastPeriod(lastPeriod) {
+  const settings = getSettings();
+  settings.lastPeriod = lastPeriod;
+
+  if (!saveSettings(settings)) {
+    return false;
+  }
+
+  lastPeriodInput.value = lastPeriod;
+  return true;
+}
+
 /* NAVIGATION */
 
 function showPage(pageName) {
@@ -580,6 +592,13 @@ trackingForm.addEventListener("submit", (event) => {
     return;
   }
 
+  if (!updateLastPeriod(start)) {
+    trackingMessage.textContent =
+      "Your record was saved, but your cycle settings could not be updated.";
+    renderPeriodHistory();
+    return;
+  }
+
   trackingMessage.textContent = "Your period record has been saved! 🌸";
 
   trackingForm.reset();
@@ -601,10 +620,34 @@ periodHistory.addEventListener("click", (event) => {
   const remainingPeriods = getSavedPeriods().filter(
     (period) => period.id !== button.dataset.periodId
   );
+  const deletedPeriod = getSavedPeriods().find(
+    (period) => period.id === button.dataset.periodId
+  );
 
   if (savePeriods(remainingPeriods)) {
+    const settings = getSettings();
+
+    if (deletedPeriod && deletedPeriod.start === settings.lastPeriod) {
+      const latestPeriod = remainingPeriods
+        .slice()
+        .sort((a, b) => b.start.localeCompare(a.start))[0];
+      const nextLastPeriod = latestPeriod ? latestPeriod.start : "";
+
+      if (!updateLastPeriod(nextLastPeriod)) {
+        trackingMessage.textContent =
+          "The record was deleted, but your cycle settings could not be updated.";
+        renderPeriodHistory();
+        return;
+      }
+    }
+
     trackingMessage.textContent = "Period record deleted.";
     renderPeriodHistory();
+    updatePredictions();
+    renderCalendar();
+  } else {
+    trackingMessage.textContent =
+      "Could not delete your record. Please check your browser storage.";
   }
 });
 
