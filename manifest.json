@@ -1,0 +1,19 @@
+{
+  "name": "CycleCare - Period Tracker",
+  "short_name": "CycleCare",
+  "description": "A private menstrual cycle and period tracking app.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#fff5f9",
+  "theme_color": "#b83270",
+  "icons": [
+    {
+      "src": "icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    }
+  ]
+}

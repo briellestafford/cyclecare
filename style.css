@@ -1,0 +1,704 @@
+:root {
+--pink: #d94f85;
+--pink-dark: #b93870;
+--pink-light: #fff0f6;
+--purple: #7965b7;
+--text: #352b3b;
+--muted: #807584;
+--border: #f0e5ed;
+--white: #ffffff;
+--background: #fffafd;
+--radius: 20px;
+}
+
+* {
+  box-sizing: border-box;
+  }
+
+[hidden] {
+display: none !important;
+}
+
+html {
+scroll-behavior: smooth;
+}
+
+body {
+margin: 0;
+color: var(--text);
+background: var(--background);
+font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+line-height: 1.6;
+}
+
+button,
+input {
+font: inherit;
+}
+
+button,
+input[type="date"],
+input[type="number"] {
+min-height: 46px;
+}
+
+button:focus-visible,
+input:focus-visible,
+a:focus-visible {
+outline: 3px solid #b7a7ef;
+outline-offset: 3px;
+}
+
+.topbar {
+display: flex;
+justify-content: space-between;
+align-items: center;
+gap: 12px;
+padding: 18px max(5%, calc((100% - 1080px) / 2));
+background: var(--white);
+border-bottom: 1px solid var(--border);
+}
+
+.brand {
+display: inline-flex;
+align-items: center;
+gap: 9px;
+color: var(--text);
+text-decoration: none;
+font-size: 21px;
+font-weight: 800;
+letter-spacing: -0.7px;
+}
+
+.brand-icon {
+display: grid;
+place-items: center;
+width: 37px;
+height: 37px;
+color: var(--pink-dark);
+background: var(--pink-light);
+border-radius: 12px;
+font-size: 25px;
+}
+
+.privacy-badge {
+color: #56775e;
+background: #f0f8f0;
+border-radius: 30px;
+padding: 7px 12px;
+font-size: 12px;
+font-weight: 600;
+}
+
+.container {
+width: min(100% - 32px, 960px);
+margin: 0 auto;
+}
+
+.welcome {
+padding: 56px 0 32px;
+text-align: center;
+}
+
+.eyebrow {
+margin: 0 0 10px;
+color: var(--pink-dark);
+font-size: 11px;
+font-weight: 800;
+letter-spacing: 1.8px;
+}
+
+h1,
+h2,
+h3,
+p {
+overflow-wrap: anywhere;
+}
+
+.welcome h1 {
+margin: 0;
+font-size: clamp(34px, 6vw, 52px);
+line-height: 1.15;
+letter-spacing: -2px;
+}
+
+.welcome h1 span {
+color: var(--pink);
+}
+
+.intro {
+max-width: 530px;
+margin: 18px auto 0;
+color: var(--muted);
+font-size: 15px;
+}
+
+.card {
+padding: 30px;
+background: var(--white);
+border: 1px solid var(--border);
+border-radius: var(--radius);
+box-shadow: 0 12px 38px rgba(105, 61, 88, 0.06);
+}
+
+.section-heading,
+.results-heading {
+display: flex;
+justify-content: space-between;
+align-items: center;
+gap: 16px;
+margin-bottom: 26px;
+}
+
+.section-heading h2,
+.results-heading h2,
+.how-it-works h2 {
+margin: 0;
+font-size: 25px;
+line-height: 1.3;
+letter-spacing: -0.7px;
+}
+
+.flower,
+.result-flower {
+display: grid;
+place-items: center;
+width: 52px;
+height: 52px;
+background: var(--pink-light);
+border-radius: 16px;
+font-size: 25px;
+}
+
+.field {
+min-width: 0;
+margin-bottom: 22px;
+}
+
+.field label {
+display: block;
+margin-bottom: 8px;
+font-size: 14px;
+font-weight: 700;
+}
+
+.field small {
+display: block;
+margin-top: 7px;
+color: var(--muted);
+font-size: 12px;
+}
+
+.field input {
+width: 100%;
+min-width: 0;
+padding: 11px 12px;
+color: var(--text);
+background: #fffafd;
+border: 1px solid #e8dce6;
+border-radius: 11px;
+}
+
+.field-row {
+display: grid;
+grid-template-columns: 1fr 1fr;
+gap: 18px;
+}
+
+.input-suffix {
+display: flex;
+align-items: center;
+gap: 8px;
+}
+
+.input-suffix input {
+flex: 1;
+}
+
+.input-suffix span {
+color: var(--muted);
+font-size: 13px;
+}
+
+.primary-button,
+.secondary-button {
+display: flex;
+justify-content: center;
+align-items: center;
+gap: 12px;
+width: 100%;
+min-height: 50px;
+padding: 12px 18px;
+border-radius: 12px;
+font-weight: 750;
+cursor: pointer;
+}
+
+.primary-button {
+color: white;
+background: var(--pink);
+border: 1px solid var(--pink);
+transition: background 0.2s ease;
+}
+
+.primary-button:hover {
+background: var(--pink-dark);
+}
+
+.secondary-button {
+margin-top: 20px;
+color: var(--pink-dark);
+background: white;
+border: 1px solid var(--border);
+}
+
+.form-message {
+margin: 10px 0 0;
+color: #b42318;
+font-size: 13px;
+}
+
+.results {
+padding-top: 48px;
+}
+
+.results-heading {
+margin-bottom: 20px;
+}
+
+.result-grid {
+display: grid;
+grid-template-columns: repeat(2, minmax(0, 1fr));
+gap: 16px;
+}
+
+.result-card {
+min-width: 0;
+padding: 23px;
+background: white;
+border: 1px solid var(--border);
+border-radius: 17px;
+}
+
+.result-card.next-period {
+background: linear-gradient(140deg, #fff0f6, #fffafd);
+border-color: #f5d9e6;
+}
+
+.result-icon {
+font-size: 23px;
+}
+
+.result-card > p {
+margin: 13px 0 5px;
+color: var(--muted);
+font-size: 13px;
+}
+
+.result-card h3 {
+margin: 0;
+color: var(--text);
+font-size: clamp(19px, 3vw, 25px);
+line-height: 1.35;
+}
+
+.result-card small {
+display: block;
+margin-top: 9px;
+color: var(--muted);
+font-size: 12px;
+}
+
+.notice {
+margin-top: 18px;
+padding: 20px;
+background: #f8f5ff;
+border: 1px solid #ebe4fa;
+border-radius: 15px;
+}
+
+.notice strong {
+font-size: 14px;
+}
+
+.notice p {
+margin: 8px 0 0;
+color: #665d73;
+font-size: 13px;
+}
+
+.how-it-works {
+padding: 65px 0 40px;
+text-align: center;
+}
+
+.how-it-works h2 {
+max-width: 560px;
+margin: 0 auto 27px;
+}
+
+.info-grid {
+display: grid;
+grid-template-columns: repeat(3, minmax(0, 1fr));
+gap: 16px;
+text-align: left;
+}
+
+.info-grid article {
+padding: 21px;
+background: white;
+border: 1px solid var(--border);
+border-radius: 16px;
+}
+
+.info-grid article > span {
+color: var(--pink);
+font-size: 13px;
+font-weight: 800;
+}
+
+.info-grid h3 {
+margin: 10px 0 6px;
+font-size: 16px;
+}
+
+.info-grid p {
+margin: 0;
+color: var(--muted);
+font-size: 13px;
+}
+
+footer {
+padding: 25px 0 32px;
+color: var(--muted);
+border-top: 1px solid var(--border);
+text-align: center;
+font-size: 12px;
+}
+
+footer p {
+margin: 5px 0;
+}
+
+.footer-note {
+max-width: 600px;
+margin: 12px auto 0;
+}
+
+@media (max-width: 600px) {
+.topbar {
+padding: 14px 16px;
+}
+
+.brand {
+font-size: 19px;
+}
+
+.privacy-badge {
+padding: 6px 8px;
+font-size: 10px;
+}
+
+.welcome {
+padding-top: 40px;
+}
+
+.card {
+padding: 21px 17px;
+}
+
+.field-row {
+grid-template-columns: 1fr;
+gap: 0;
+}
+
+.result-grid {
+grid-template-columns: 1fr;
+}
+
+.info-grid {
+grid-template-columns: 1fr;
+}
+
+.how-it-works {
+padding-top: 48px;
+}
+}
+
+@media (prefers-reduced-motion: reduce) {
+*,
+*::before,
+*::after {
+scroll-behavior: auto !important;
+transition: none !important;
+}
+}
+/* CycleCare Period Calendar */
+
+.calendar-section {
+  background: #ffffff;
+  border: 1px solid #f5dce7;
+  border-radius: 20px;
+  padding: 24px;
+  margin: 28px 0;
+  box-shadow: 0 8px 24px rgba(190, 90, 130, 0.08);
+}
+
+.calendar-heading h2 {
+  color: #b83270;
+  margin: 0 0 8px;
+  font-size: 1.5rem;
+}
+
+.calendar-heading p {
+  color: #777;
+  margin-bottom: 22px;
+}
+
+.calendar-navigation {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+}
+
+.calendar-navigation h3 {
+  color: #44313b;
+  margin: 0;
+  text-align: center;
+}
+
+.calendar-navigation button {
+  border: none;
+  background: #fde7f0;
+  color: #b83270;
+  border-radius: 10px;
+  width: 40px;
+  height: 40px;
+  font-size: 18px;
+  cursor: pointer;
+}
+
+.calendar-navigation button:hover {
+  background: #f8cddd;
+}
+
+.calendar-grid {
+  display: grid;
+  grid-template-columns: repeat(7, minmax(0, 1fr));
+  gap: 8px;
+}
+
+.calendar-day {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 42px;
+  border-radius: 12px;
+  font-size: 14px;
+  color: #44313b;
+  background: #fff8fb;
+}
+
+.calendar-day.weekday {
+  background: transparent;
+  color: #888;
+  font-weight: 600;
+  min-height: 30px;
+}
+
+.calendar-day.empty {
+  background: transparent;
+}
+
+.calendar-day.expected-period {
+  background: #f8cddd;
+  color: #8e2455;
+  font-weight: 700;
+}
+
+.calendar-day.today {
+  outline: 2px solid #b83270;
+  outline-offset: -2px;
+  font-weight: 700;
+}
+
+.calendar-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 18px;
+  margin-top: 20px;
+  color: #666;
+  font-size: 13px;
+}
+
+.legend-dot {
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  margin-right: 6px;
+}
+
+.period-dot {
+  background: #f1a9c6;
+}
+
+.today-dot {
+  border: 2px solid #b83270;
+}
+
+.calendar-note {
+  margin-top: 18px;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #888;
+}
+
+@media (max-width: 480px) {
+  .calendar-section {
+    padding: 16px;
+  }
+
+  .calendar-grid {
+    gap: 4px;
+  }
+
+  .calendar-day {
+    min-height: 36px;
+    font-size: 12px;
+    border-radius: 8px;
+  }
+}/* CycleCare Period Tracking */
+
+.tracking-section {
+  background: #ffffff;
+  border: 1px solid #f5dce7;
+  border-radius: 20px;
+  padding: 24px;
+  margin: 28px 0;
+  box-shadow: 0 8px 24px rgba(190, 90, 130, 0.08);
+}
+
+.tracking-heading h2 {
+  color: #b83270;
+  margin-top: 0;
+  margin-bottom: 8px;
+}
+
+.tracking-heading p {
+  color: #777;
+  line-height: 1.6;
+}
+
+#tracking-form {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-top: 22px;
+}
+
+#tracking-form label {
+  color: #44313b;
+  font-weight: 600;
+  margin-top: 8px;
+}
+
+#tracking-form input {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px;
+  border: 1px solid #edc9d9;
+  border-radius: 10px;
+  background: #fffafd;
+  color: #44313b;
+  font: inherit;
+}
+
+#tracking-form input:focus {
+  outline: 2px solid #b83270;
+  outline-offset: 2px;
+}
+
+.tracking-save-button {
+  margin-top: 12px;
+  padding: 13px 18px;
+  border: none;
+  border-radius: 12px;
+  background: #b83270;
+  color: white;
+  font-size: 16px;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.tracking-save-button:hover {
+  background: #98275d;
+}
+
+#tracking-message {
+  color: #b83270;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+.history-section {
+  margin-top: 30px;
+  padding-top: 20px;
+  border-top: 1px solid #f5dce7;
+}
+
+.history-section h3 {
+  color: #b83270;
+  margin-bottom: 16px;
+}
+
+.period-history-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  padding: 14px;
+  margin-bottom: 10px;
+  background: #fff5f9;
+  border: 1px solid #f5dce7;
+  border-radius: 12px;
+}
+
+.period-history-item p {
+  margin: 4px 0;
+  color: #66545e;
+  font-size: 14px;
+}
+
+.delete-period-button {
+  padding: 8px 12px;
+  border: 1px solid #e6a9c2;
+  border-radius: 8px;
+  background: white;
+  color: #a4265e;
+  cursor: pointer;
+}
+
+.delete-period-button:hover {
+  background: #fde7f0;
+}
+
+.tracking-privacy {
+  margin-top: 20px;
+  color: #888;
+  font-size: 12px;
+  line-height: 1.6;
+}
+
+@media (max-width: 480px) {
+  .tracking-section {
+    padding: 16px;
+  }
+
+  .period-history-item {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

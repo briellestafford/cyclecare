@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+
+<html lang="en">
+    <link rel="manifest" href="manifest.json">
+<meta name="theme-color" content="#b83270">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#fff7fa">
+  <meta name="description" content="CycleCare helps you estimate your menstrual cycle, upcoming periods, and ovulation dates.">
+  <title>CycleCare | Period Tracker</title>
+  <link rel="stylesheet" href="style.css">
+  <script src="script.js" defer></script>
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="#" aria-label="CycleCare home">
+      <span class="brand-icon">✿</span>
+      <span>CycleCare</span>
+    </a>
+    <span class="privacy-badge">🔒 Private by design</span>
+  </header>
+
+  <main class="container">
+    <section class="welcome">
+      <p class="eyebrow">YOUR PERSONAL CYCLE COMPANION</p>
+      <h1>Understand your <span>cycle.</span></h1>
+      <p class="intro">
+        Track your period, explore your cycle patterns, and plan ahead
+        with thoughtful estimates.
+      </p>
+    </section>
+
+```
+<section class="calculator card" aria-labelledby="calculator-title">
+  <div class="section-heading">
+    <div>
+      <p class="eyebrow">LET'S GET STARTED</p>
+      <h2 id="calculator-title">Your cycle details</h2>
+    </div>
+    <span class="flower">🌸</span>
+  </div>
+
+  <form id="cycle-form">
+    <div class="field">
+      <label for="last-period">When did your last period start?</label>
+      <input type="date" id="last-period" required>
+      <small>Choose the first day of your most recent period.</small>
+    </div>
+
+    <div class="field-row">
+      <div class="field">
+        <label for="cycle-length">Typical cycle length</label>
+        <div class="input-suffix">
+          <input type="number" id="cycle-length" min="15" max="60"
+            value="28" required>
+          <span>days</span>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="period-length">Period duration</label>
+        <div class="input-suffix">
+          <input type="number" id="period-length" min="1" max="15"
+            value="5" required>
+          <span>days</span>
+        </div>
+      </div>
+    </div>
+
+    <button class="primary-button" type="submit">
+      Calculate my cycle <span aria-hidden="true">→</span>
+    </button>
+
+    <p id="form-message" class="form-message" role="alert"></p>
+  </form>
+</section>
+
+<section id="results" class="results" hidden aria-live="polite">
+  <div class="results-heading">
+    <div>
+      <p class="eyebrow">YOUR PERSONAL OVERVIEW</p>
+      <h2>Cycle estimates</h2>
+    </div>
+    <span class="result-flower">🌷</span>
+  </div>
+
+  <div class="result-grid">
+    <article class="result-card next-period">
+      <span class="result-icon">🩷</span>
+      <p>Next expected period</p>
+      <h3 id="next-period-date">—</h3>
+      <small id="period-countdown">An estimate based on your cycle</small>
+    </article>
+
+    <article class="result-card">
+      <span class="result-icon">🌱</span>
+      <p>Estimated ovulation</p>
+      <h3 id="ovulation-date">—</h3>
+      <small>Timing may vary</small>
+    </article>
+
+    <article class="result-card">
+      <span class="result-icon">🌼</span>
+      <p>Estimated fertile window</p>
+      <h3 id="fertile-window">—</h3>
+      <small>Not a contraceptive method</small>
+    </article>
+
+    <article class="result-card">
+      <span class="result-icon">🗓️</span>
+      <p>Typical cycle</p>
+      <h3 id="cycle-summary">28 days</h3>
+      <small id="duration-summary">Period duration: 5 days</small>
+    </article>
+  </div>
+
+  <div class="notice">
+    <section class="tracking-section">
+    <div class="tracking-heading">
+      <h2>🩷 Track Your Period</h2>
+      <p>Record your period dates to keep track of your cycle.</p>
+    </div>
+
+    <form id="tracking-form">
+      <label for="tracking-start">Period start date</label>
+      <input type="date" id="tracking-start" required>
+
+      <label for="tracking-end">Period end date (optional)</label>
+      <input type="date" id="tracking-end">
+
+      <button type="submit" class="tracking-save-button">
+        Save Period
+      </button>
+
+      <p id="tracking-message" role="status" aria-live="polite"></p>
+    </form>
+
+    <div class="history-section">
+      <h3>📅 Your Period History</h3>
+      <div id="period-history">
+        <p>Your saved periods will appear here.</p>
+      </div>
+    </div>
+
+    <p class="tracking-privacy">
+      Your records will be saved in this browser on your device.
+    </p>
+  </section>  <section class="calendar-section">
+    <div class="calendar-heading">
+      <h2>🌸 Your Period Calendar</h2>
+      <p>Keep track of your cycle, one day at a time.</p>
+    </div>
+
+    <div class="calendar-navigation">
+      <button type="button" id="prev-month" aria-label="Previous month">❮</button>
+      <h3 id="calendar-month">Month Year</h3>
+      <button type="button" id="next-month" aria-label="Next month">❯</button>
+    </div>
+
+    <div class="calendar-grid" id="calendar-grid">
+    </div>
+
+    <div class="calendar-legend">
+      <span><i class="legend-dot period-dot"></i> Expected period</span>
+      <span><i class="legend-dot today-dot"></i> Today</span>
+    </div>
+
+    <p class="calendar-note">
+      Calendar dates are estimates and may not match your actual cycle.
+    </p>
+  </section>
+    <strong>A gentle reminder</strong>
+    <p>
+      These dates are estimates, not medical predictions. Ovulation
+      can change from cycle to cycle, and calendar calculations cannot
+      reliably determine when pregnancy is possible or prevent pregnancy.
+      If your periods are persistently irregular or you have concerns,
+      consider speaking with a qualified healthcare professional.
+    </p>
+  </div>
+
+  <button id="edit-button" class="secondary-button" type="button">
+    Edit my details
+  </button>
+</section>
+
+<section class="how-it-works">
+  <p class="eyebrow">SIMPLE. THOUGHTFUL. PERSONAL.</p>
+  <h2>Small steps towards understanding your cycle.</h2>
+  <div class="info-grid">
+    <article>
+      <span>01</span>
+      <h3>Enter your dates</h3>
+      <p>Add your latest period start date and typical cycle details.</p>
+    </article>
+    <article>
+      <span>02</span>
+      <h3>Explore estimates</h3>
+      <p>See estimated dates based on the information you provide.</p>
+    </article>
+    <article>
+      <span>03</span>
+      <h3>Learn your patterns</h3>
+      <p>Future versions will help you record periods and review history.</p>
+    </article>
+  </div>
+</section>
+
+<footer>
+  <p>CycleCare © 2026</p>
+  <p>Your health matters. Your privacy matters.</p>
+  <p class="footer-note">
+    For educational purposes only. Not a diagnostic tool or a substitute
+    for professional medical advice.
+  </p>
+</footer>
+```
+
+  </main>
+</body>
+</html>
