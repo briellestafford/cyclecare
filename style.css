@@ -1521,3 +1521,38 @@ a {
     transition-duration: 0.01ms !important;
   }
 }
+/* CycleCare calendar predictions */
+
+.calendar-day.fertile-window {
+background: #fce7f3;
+color: #9d174d;
+border: 1px solid #f9a8d4;
+border-radius: 12px;
+}
+
+.calendar-day.ovulation-day {
+background: #c84d7c;
+color: #ffffff;
+border: 2px solid #a52e60;
+border-radius: 12px;
+font-weight: 700;
+box-shadow: 0 3px 10px rgba(200, 77, 124, 0.22);
+}
+
+.calendar-day.expected-period {
+background: #ffe0e8;
+color: #9f1239;
+border: 1px solid #f9a8b8;
+border-radius: 12px;
+font-weight: 600;
+}
+
+.calendar-day.today {
+outline: 2px solid #c84d7c;
+outline-offset: 2px;
+}
+
+/* Keep the ovulation highlight visible when it overlaps another state. */
+.calendar-day.ovulation-day.today {
+outline-color: #a52e60;
+}
