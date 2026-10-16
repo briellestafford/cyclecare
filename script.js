@@ -633,7 +633,12 @@ trackingForm.addEventListener("submit", (event) => {
   const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
   periods.push({ id, start, end });
-
+  
+  if (!savePeriods(periods)) {
+  trackingMessage.textContent =
+    "Could not save your period record. Please check your browser storage.";
+  return;
+}
  const settings = getSettings();
 settings.lastPeriod = start;
 saveSettings(settings);
