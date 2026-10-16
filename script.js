@@ -1,295 +1,95 @@
-"use strict";
+/* =========================================
+   CYCLECARE — APP FUNCTIONALITY
+========================================= */
 
-const form = document.getElementById("cycle-form");
-const lastPeriodInput = document.getElementById("last-period");
-const cycleLengthInput = document.getElementById("cycle-length");
-const periodLengthInput = document.getElementById("period-length");
-const formMessage = document.getElementById("form-message");
-const results = document.getElementById("results");
-const editButton = document.getElementById("edit-button");
+const STORAGE_KEY = "cyclecare-period-history";
+const SETTINGS_KEY = "cyclecare-settings";
 
-// Use calendar dates rather than timestamps to avoid time-zone shifts.
+const $ = (selector) => document.querySelector(selector);
+const $$ = (selector) => [...document.querySelectorAll(selector)];
+
+const trackingForm = $("#tracking-form");
+const trackingStart = $("#tracking-start");
+const trackingEnd = $("#tracking-end");
+const trackingMessage = $("#tracking-message");
+const periodHistory = $("#period-history");
+
+const settingsForm = $("#settings-form");
+const lastPeriodInput = $("#last-period");
+const cycleLengthInput = $("#cycle-length");
+const periodLengthInput = $("#period-length");
+const settingsMessage = $("#settings-message");
+
+let calendarMonth = new Date();
+calendarMonth.setDate(1);
+
+/* DATE HELPERS */
+
 function parseDate(value) {
-const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!value) return null;
 
-if (!match) return null;
+  const parts = value.split("-").map(Number);
 
-const year = Number(match[1]);
-const month = Number(match[2]);
-const day = Number(match[3]);
-const date = new Date(Date.UTC(year, month - 1, day));
+  if (parts.length !== 3 || parts.some(Number.isNaN)) {
+    return null;
+  }
 
-if (
-date.getUTCFullYear() !== year ||
-date.getUTCMonth() !== month - 1 ||
-date.getUTCDate() !== day
-) {
-return null;
+  const date = new Date(parts[0], parts[1] - 1, parts[2]);
+  date.setHours(12, 0, 0, 0);
+
+  return date;
 }
 
-return date;
+function dateToString(date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}-${month}-${day}`;
 }
 
 function addDays(date, days) {
-const result = new Date(date.getTime());
-result.setUTCDate(result.getUTCDate() + days);
-return result;
+  const result = new Date(date);
+  result.setDate(result.getDate() + days);
+  return result;
 }
 
 function formatDate(date) {
-return new Intl.DateTimeFormat("en", {
-day: "numeric",
-month: "short",
-year: "numeric",
-timeZone: "UTC"
-}).format(date);
-}
+  if (!date || Number.isNaN(date.getTime())) {
+    return "Not calculated yet";
+  }
 
-function daysBetween(first, second) {
-return Math.round((second - first) / 86400000);
-}
-
-function showMessage(message) {
-formMessage.textContent = message;
-}
-
-function calculateCycle(event) {
-event.preventDefault();
-showMessage("");
-
-const lastPeriod = parseDate(lastPeriodInput.value);
-const cycleLength = Number(cycleLengthInput.value);
-const periodLength = Number(periodLengthInput.value);
-
-if (!lastPeriod) {
-showMessage("Please enter a valid period start date.");
-return;
-}
-
-const today = new Date();
-const todayUTC = new Date(Date.UTC(
-today.getFullYear(),
-today.getMonth(),
-today.getDate()
-));
-
-if (lastPeriod > todayUTC) {
-showMessage("The period start date cannot be in the future.");
-return;
-}
-
-if (!Number.isInteger(cycleLength) ||
-cycleLength < 15 || cycleLength > 60) {
-showMessage("Enter a cycle length between 15 and 60 days.");
-return;
-}
-
-if (!Number.isInteger(periodLength) ||
-periodLength < 1 || periodLength > 15) {
-showMessage("Enter a period duration between 1 and 15 days.");
-return;
-}
-
-// Estimate the next period by advancing complete cycles.
-// This prevents the displayed prediction from remaining in the past.
-const elapsedDays = daysBetween(lastPeriod, todayUTC);
-const completedCycles = Math.floor(elapsedDays / cycleLength);
-const nextPeriod = addDays(
-lastPeriod,
-(completedCycles + 1) * cycleLength
-);
-
-// Simplified estimates only; not confirmation of ovulation.
-const ovulation = addDays(nextPeriod, -14);
-const fertileStart = addDays(ovulation, -5);
-const fertileEnd = addDays(ovulation, 1);
-
-document.getElementById("next-period-date").textContent =
-formatDate(nextPeriod);
-
-const daysUntilPeriod = daysBetween(todayUTC, nextPeriod);
-document.getElementById("period-countdown").textContent =
-daysUntilPeriod === 1
-? "Estimated in 1 day"
-: `Estimated in ${daysUntilPeriod} days`;
-
-document.getElementById("ovulation-date").textContent =
-formatDate(ovulation);
-
-document.getElementById("fertile-window").textContent =
-`${formatDate(fertileStart)} – ${formatDate(fertileEnd)}`;
-
-document.getElementById("cycle-summary").textContent =
-`${cycleLength} days`;
-
-document.getElementById("duration-summary").textContent =
-`Period duration: ${periodLength} days`;
-
-results.hidden = false;
-results.scrollIntoView({ behavior: "smooth", block: "start" });
-}
-
-form.addEventListener("submit", calculateCycle);
-
-editButton.addEventListener("click", () => {
-results.hidden = true;
-lastPeriodInput.focus();
-form.scrollIntoView({ behavior: "smooth", block: "start" });
-});
-
-// Set a convenient default date without overwriting a saved user choice.
-const today = new Date();
-const localToday = [
-today.getFullYear(),
-String(today.getMonth() + 1).padStart(2, "0"),
-String(today.getDate()).padStart(2, "0")
-].join("-");
-
-lastPeriodInput.max = localToday;
-lastPeriodInput.value = localToday;
-
-
-// CycleCare calendar functionality
-
-const calendarGrid = document.getElementById("calendar-grid");
-const calendarMonthTitle = document.getElementById("calendar-month");
-const previousMonthButton = document.getElementById("prev-month");
-const nextMonthButton = document.getElementById("next-month");
-
-const calendarWeekdays = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
-
-let calendarDate = new Date();
-calendarDate.setDate(1);
-
-function renderCalendar() {
-  if (!calendarGrid || !calendarMonthTitle) return;
-
-  const year = calendarDate.getFullYear();
-  const month = calendarDate.getMonth();
-
-  calendarMonthTitle.textContent = calendarDate.toLocaleDateString(
-    "en-US",
-    { month: "long", year: "numeric" }
-  );
-
-  calendarGrid.innerHTML = "";
-
-  calendarWeekdays.forEach((weekday) => {
-    const heading = document.createElement("div");
-    heading.className = "calendar-day weekday";
-    heading.textContent = weekday;
-    calendarGrid.appendChild(heading);
+  return date.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short",
+    year: "numeric"
   });
-
-  const firstDay = new Date(Date.UTC(year, month, 1)).getUTCDay();
-  const daysInMonth = new Date(Date.UTC(year, month + 1, 0)).getUTCDate();
-
-  for (let i = 0; i < firstDay; i++) {
-    const emptyDay = document.createElement("div");
-    emptyDay.className = "calendar-day empty";
-    calendarGrid.appendChild(emptyDay);
-  }
-
-  const today = new Date();
-  const todayKey = [
-    today.getFullYear(),
-    String(today.getMonth() + 1).padStart(2, "0"),
-    String(today.getDate()).padStart(2, "0")
-  ].join("-");
-
-  const lastPeriodValue = lastPeriodInput.value;
-  const cycleLength = Number(cycleLengthInput.value);
-  const periodLength = Number(periodLengthInput.value);
-
-  let lastPeriodDate = null;
-
-  if (lastPeriodValue) {
-    const parts = lastPeriodValue.split("-").map(Number);
-
-    if (parts.length === 3 && parts.every(Number.isFinite)) {
-      lastPeriodDate = Date.UTC(parts[0], parts[1] - 1, parts[2]);
-    }
-  }
-
-  for (let day = 1; day <= daysInMonth; day++) {
-    const dateKey = [
-      year,
-      String(month + 1).padStart(2, "0"),
-      String(day).padStart(2, "0")
-    ].join("-");
-
-    const dayElement = document.createElement("div");
-    dayElement.className = "calendar-day";
-    dayElement.textContent = day;
-
-    if (dateKey === todayKey) {
-      dayElement.classList.add("today");
-    }
-
-    if (
-      lastPeriodDate !== null &&
-      Number.isFinite(cycleLength) &&
-      cycleLength >= 21 &&
-      cycleLength <= 45 &&
-      Number.isFinite(periodLength) &&
-      periodLength >= 1 &&
-      periodLength <= 10
-    ) {
-      const currentDate = Date.UTC(year, month, day);
-      const difference = Math.round(
-        (currentDate - lastPeriodDate) / 86400000
-      );
-
-      const dayInCycle = ((difference % cycleLength) + cycleLength)
-        % cycleLength;
-
-      if (dayInCycle < periodLength) {
-        dayElement.classList.add("expected-period");
-        dayElement.title = "Estimated period day";
-      }
-    }
-
-    calendarGrid.appendChild(dayElement);
-  }
 }
 
-previousMonthButton.addEventListener("click", () => {
-  calendarDate.setMonth(calendarDate.getMonth() - 1);
-  renderCalendar();
-});
+function formatShortDate(date) {
+  if (!date) return "";
 
-nextMonthButton.addEventListener("click", () => {
-  calendarDate.setMonth(calendarDate.getMonth() + 1);
-  renderCalendar();
-});
+  return date.toLocaleDateString("en-GB", {
+    day: "numeric",
+    month: "short"
+  });
+}
 
-lastPeriodInput.addEventListener("change", renderCalendar);
-cycleLengthInput.addEventListener("change", renderCalendar);
-periodLengthInput.addEventListener("change", renderCalendar);
+function sameDay(a, b) {
+  return a.getFullYear() === b.getFullYear() &&
+    a.getMonth() === b.getMonth() &&
+    a.getDate() === b.getDate();
+}
 
-form.addEventListener("submit", () => {
-  renderCalendar();
-});
-
-renderCalendar();
-
-// CycleCare Period Tracking
-
-const trackingForm = document.getElementById("tracking-form");
-const trackingStart = document.getElementById("tracking-start");
-const trackingEnd = document.getElementById("tracking-end");
-const trackingMessage = document.getElementById("tracking-message");
-const periodHistory = document.getElementById("period-history");
-
-const TRACKING_STORAGE_KEY = "cyclecare-period-history";
+/* SAVE AND LOAD DATA */
 
 function getSavedPeriods() {
   try {
-    const saved = JSON.parse(
-      localStorage.getItem(TRACKING_STORAGE_KEY) || "[]"
+    const records = JSON.parse(
+      localStorage.getItem(STORAGE_KEY) || "[]"
     );
 
-    return Array.isArray(saved) ? saved : [];
+    return Array.isArray(records) ? records : [];
   } catch {
     return [];
   }
@@ -297,47 +97,409 @@ function getSavedPeriods() {
 
 function savePeriods(periods) {
   try {
-    localStorage.setItem(
-      TRACKING_STORAGE_KEY,
-      JSON.stringify(periods)
-    );
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(periods));
     return true;
   } catch {
-    trackingMessage.textContent =
-      "Could not save your record. Please check your browser storage.";
     return false;
   }
 }
 
-function formatTrackingDate(dateString) {
-  const parts = dateString.split("-").map(Number);
+function getSettings() {
+  const defaults = {
+    lastPeriod: "",
+    cycleLength: 28,
+    periodLength: 5
+  };
 
-  const date = new Date(
-    Date.UTC(parts[0], parts[1] - 1, parts[2])
+  try {
+    const saved = JSON.parse(
+      localStorage.getItem(SETTINGS_KEY) || "{}"
+    );
+
+    return {
+      lastPeriod: typeof saved.lastPeriod === "string"
+        ? saved.lastPeriod
+        : defaults.lastPeriod,
+
+      cycleLength: Number(saved.cycleLength) >= 21 &&
+        Number(saved.cycleLength) <= 35
+        ? Number(saved.cycleLength)
+        : defaults.cycleLength,
+
+      periodLength: Number(saved.periodLength) >= 2 &&
+        Number(saved.periodLength) <= 10
+        ? Number(saved.periodLength)
+        : defaults.periodLength
+    };
+  } catch {
+    return defaults;
+  }
+}
+
+function saveSettings(settings) {
+  try {
+    localStorage.setItem(SETTINGS_KEY, JSON.stringify(settings));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/* NAVIGATION */
+
+function showPage(pageName) {
+  const page = $(`#page-${pageName}`);
+
+  if (!page) return;
+
+  $$(".app-page").forEach((section) => {
+    section.classList.toggle("active", section === page);
+  });
+
+  $$("[data-page]").forEach((button) => {
+    const active = button.dataset.page === pageName;
+
+    if (
+      button.classList.contains("nav-item") ||
+      button.classList.contains("mobile-nav-item")
+    ) {
+      button.classList.toggle("active", active);
+    }
+  });
+
+  const titles = {
+    home: "Your cycle, your care.",
+    calendar: "Your period calendar.",
+    insights: "Your cycle insights.",
+    tracking: "Your personal cycle diary."
+  };
+
+  const title = $("#page-title");
+
+  if (title) {
+    title.textContent = titles[pageName] || titles.home;
+  }
+
+  window.scrollTo({ top: 0, behavior: "smooth" });
+}
+
+$$("[data-page]").forEach((button) => {
+  button.addEventListener("click", (event) => {
+    event.preventDefault();
+    showPage(button.dataset.page);
+  });
+});
+
+/* PREDICTIONS */
+
+function getPredictionSettings() {
+  const settings = getSettings();
+
+  return {
+    lastPeriod: settings.lastPeriod,
+    cycleLength: settings.cycleLength,
+    periodLength: settings.periodLength
+  };
+}
+
+function getNextPeriodDate(lastPeriod, cycleLength) {
+  const start = parseDate(lastPeriod);
+
+  if (!start) return null;
+
+  const today = new Date();
+  today.setHours(12, 0, 0, 0);
+
+  let next = new Date(start);
+
+  while (next < today) {
+    next = addDays(next, cycleLength);
+  }
+
+  return next;
+}
+
+function getPreviousOrNextCycleStart(lastPeriod, cycleLength, targetDate) {
+  const start = parseDate(lastPeriod);
+
+  if (!start) return null;
+
+  const difference = Math.floor(
+    (targetDate - start) / 86400000
   );
 
-  return date.toLocaleDateString("en-GB", {
-    day: "numeric",
-    month: "short",
-    year: "numeric",
-    timeZone: "UTC"
+  const cycleNumber = Math.floor(difference / cycleLength);
+
+  return addDays(start, cycleNumber * cycleLength);
+}
+
+function isExpectedPeriodDay(date, settings) {
+  const start = parseDate(settings.lastPeriod);
+
+  if (!start || !date || date < start) {
+    return false;
+  }
+
+  const difference = Math.floor(
+    (date - start) / 86400000
+  );
+
+  const cycleDay = difference % settings.cycleLength;
+
+  return cycleDay >= 0 &&
+    cycleDay < settings.periodLength;
+}
+
+function updatePredictions() {
+  const settings = getPredictionSettings();
+
+  const lastPeriod = settings.lastPeriod;
+  const cycleLength = settings.cycleLength;
+  const periodLength = settings.periodLength;
+
+  $("#cycle-length-display").textContent = cycleLength;
+  $("#insight-cycle-length").textContent = cycleLength;
+  $("#insight-period-length").textContent = periodLength;
+
+  const nextDateElement = $("#next-period-date");
+  const countdownElement = $("#next-period-countdown");
+  const ovulationElement = $("#ovulation-date");
+  const ovulationDescription = $("#ovulation-description");
+  const fertileElement = $("#fertile-dates");
+  const progressElement = $("#cycle-progress");
+
+  const lastDate = parseDate(lastPeriod);
+  const today = new Date();
+  today.setHours(12, 0, 0, 0);
+
+  if (!lastDate) {
+    nextDateElement.textContent = "Add your last period";
+    countdownElement.textContent = "Your estimate will appear here.";
+    ovulationElement.textContent = "Not calculated yet";
+    ovulationDescription.textContent = "Add your cycle details to begin.";
+    fertileElement.textContent = "Not calculated yet";
+    progressElement.style.width = "0%";
+    return;
+  }
+
+  const nextDate = getNextPeriodDate(lastPeriod, cycleLength);
+
+  if (!nextDate) return;
+
+  const daysUntil = Math.round(
+    (nextDate - today) / 86400000
+  );
+
+  nextDateElement.textContent = formatDate(nextDate);
+
+  if (daysUntil === 0) {
+    countdownElement.textContent = "Expected today";
+  } else if (daysUntil === 1) {
+    countdownElement.textContent = "Estimated in 1 day";
+  } else {
+    countdownElement.textContent = `Estimated in ${daysUntil} days`;
+  }
+
+  const previousStart = getPreviousOrNextCycleStart(
+    lastPeriod,
+    cycleLength,
+    today
+  );
+
+  const cycleDay = Math.max(
+    1,
+    Math.floor((today - previousStart) / 86400000) + 1
+  );
+
+  progressElement.style.width =
+    `${Math.min(100, (cycleDay / cycleLength) * 100)}%`;
+
+  // Approximate ovulation: around 14 days before the next period.
+  const ovulationDate = addDays(nextDate, -14);
+
+  ovulationElement.textContent = formatDate(ovulationDate);
+  ovulationDescription.textContent = "Approximate ovulation date";
+
+  // Approximate fertile window: five days before ovulation through
+  // the estimated ovulation day.
+  const fertileStart = addDays(ovulationDate, -5);
+
+  fertileElement.textContent =
+    `${formatShortDate(fertileStart)} – ${formatShortDate(ovulationDate)}`;
+}
+
+/* CALENDAR */
+
+function renderCalendar() {
+  const grid = $("#calendar-grid");
+  const heading = $("#calendar-month");
+
+  if (!grid || !heading) return;
+
+  grid.innerHTML = "";
+
+  heading.textContent = calendarMonth.toLocaleDateString("en-GB", {
+    month: "long",
+    year: "numeric"
   });
+
+  const weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+
+  weekdays.forEach((day) => {
+    const element = document.createElement("div");
+    element.className = "weekday";
+    element.textContent = day;
+    grid.appendChild(element);
+  });
+
+  const year = calendarMonth.getFullYear();
+  const month = calendarMonth.getMonth();
+
+  const firstDay = new Date(year, month, 1);
+  const daysInMonth = new Date(year, month + 1, 0).getDate();
+
+  // Monday-first calendar.
+  const offset = (firstDay.getDay() + 6) % 7;
+
+  for (let i = 0; i < offset; i++) {
+    const empty = document.createElement("div");
+    empty.className = "calendar-day empty";
+    grid.appendChild(empty);
+  }
+
+  const settings = getPredictionSettings();
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const date = new Date(year, month, day);
+    date.setHours(12, 0, 0, 0);
+
+    const element = document.createElement("div");
+    element.className = "calendar-day";
+    element.textContent = day;
+
+    if (isExpectedPeriodDay(date, settings)) {
+      element.classList.add("expected-period");
+      element.title = "Estimated period day";
+    }
+
+    const today = new Date();
+    today.setHours(12, 0, 0, 0);
+
+    if (sameDay(date, today)) {
+      element.classList.add("today");
+      element.title = element.title
+        ? `${element.title}; Today`
+        : "Today";
+    }
+
+    grid.appendChild(element);
+  }
+
+  renderHomeCalendar();
+}
+
+function renderHomeCalendar() {
+  const grid = $("#home-calendar");
+
+  if (!grid) return;
+
+  grid.innerHTML = "";
+
+  const today = new Date();
+  today.setHours(12, 0, 0, 0);
+
+  const firstDay = new Date(
+    today.getFullYear(),
+    today.getMonth(),
+    1
+  );
+
+  const weekdays = ["M", "T", "W", "T", "F", "S", "S"];
+
+  weekdays.forEach((day) => {
+    const element = document.createElement("div");
+    element.className = "weekday";
+    element.textContent = day;
+    grid.appendChild(element);
+  });
+
+  const offset = (firstDay.getDay() + 6) % 7;
+
+  for (let i = 0; i < offset; i++) {
+    const empty = document.createElement("div");
+    empty.className = "mini-day empty";
+    grid.appendChild(empty);
+  }
+
+  const daysInMonth = new Date(
+    today.getFullYear(),
+    today.getMonth() + 1,
+    0
+  ).getDate();
+
+  const settings = getPredictionSettings();
+
+  for (let day = 1; day <= daysInMonth; day++) {
+    const date = new Date(
+      today.getFullYear(),
+      today.getMonth(),
+      day
+    );
+
+    date.setHours(12, 0, 0, 0);
+
+    const element = document.createElement("div");
+    element.className = "mini-day";
+    element.textContent = day;
+
+    if (isExpectedPeriodDay(date, settings)) {
+      element.classList.add("expected-period");
+    }
+
+    if (sameDay(date, today)) {
+      element.classList.add("today");
+    }
+
+    grid.appendChild(element);
+  }
+}
+
+$("#prev-month").addEventListener("click", () => {
+  calendarMonth.setMonth(calendarMonth.getMonth() - 1);
+  renderCalendar();
+});
+
+$("#next-month").addEventListener("click", () => {
+  calendarMonth.setMonth(calendarMonth.getMonth() + 1);
+  renderCalendar();
+});
+
+/* PERIOD TRACKING */
+
+function formatTrackingDate(value) {
+  const date = parseDate(value);
+  return date ? formatDate(date) : value;
 }
 
 function renderPeriodHistory() {
   const periods = getSavedPeriods();
 
+  periods.sort((a, b) => b.start.localeCompare(a.start));
+
   periodHistory.innerHTML = "";
 
+  $("#insight-record-count").textContent = periods.length;
+  $("#history-count").textContent =
+    `${periods.length} ${periods.length === 1 ? "record" : "records"}`;
+
   if (periods.length === 0) {
-    const emptyMessage = document.createElement("p");
-    emptyMessage.textContent =
+    const message = document.createElement("p");
+    message.textContent =
       "No periods recorded yet. Your saved periods will appear here.";
-    periodHistory.appendChild(emptyMessage);
+
+    periodHistory.appendChild(message);
     return;
   }
-
-  periods.sort((a, b) => b.start.localeCompare(a.start));
 
   periods.forEach((period) => {
     const item = document.createElement("article");
@@ -350,7 +512,7 @@ function renderPeriodHistory() {
 
     const startText = document.createElement("p");
     startText.textContent =
-      "Started: " + formatTrackingDate(period.start);
+      `Started: ${formatTrackingDate(period.start)}`;
 
     details.appendChild(title);
     details.appendChild(startText);
@@ -358,7 +520,8 @@ function renderPeriodHistory() {
     if (period.end) {
       const endText = document.createElement("p");
       endText.textContent =
-        "Ended: " + formatTrackingDate(period.end);
+        `Ended: ${formatTrackingDate(period.end)}`;
+
       details.appendChild(endText);
     } else {
       const ongoingText = document.createElement("p");
@@ -373,7 +536,7 @@ function renderPeriodHistory() {
     deleteButton.dataset.periodId = period.id;
     deleteButton.setAttribute(
       "aria-label",
-      "Delete period record starting " + formatTrackingDate(period.start)
+      `Delete period record starting ${formatTrackingDate(period.start)}`
     );
 
     item.appendChild(details);
@@ -389,8 +552,7 @@ trackingForm.addEventListener("submit", (event) => {
   const end = trackingEnd.value;
 
   if (!start) {
-    trackingMessage.textContent =
-      "Please choose your period start date.";
+    trackingMessage.textContent = "Please choose your period start date.";
     return;
   }
 
@@ -402,28 +564,29 @@ trackingForm.addEventListener("submit", (event) => {
 
   const periods = getSavedPeriods();
 
-  const duplicate = periods.some(
-    (period) => period.start === start
-  );
-
-  if (duplicate) {
+  if (periods.some((period) => period.start === start)) {
     trackingMessage.textContent =
-      "A record with this start date already exists. You can delete the old record first.";
+      "A record with this start date already exists. Delete the old record first.";
     return;
   }
 
-  periods.push({
-    id: String(Date.now()) + "-" + Math.random().toString(36).slice(2, 8),
-    start,
-    end
-  });
+  const id = `${Date.now()}-${Math.random().toString(36).slice(2, 8)}`;
 
-  if (!savePeriods(periods)) return;
+  periods.push({ id, start, end });
+
+  if (!savePeriods(periods)) {
+    trackingMessage.textContent =
+      "Could not save your record. Please check your browser storage.";
+    return;
+  }
 
   trackingMessage.textContent = "Your period record has been saved! 🌸";
 
   trackingForm.reset();
+
   renderPeriodHistory();
+  updatePredictions();
+  renderCalendar();
 });
 
 periodHistory.addEventListener("click", (event) => {
@@ -431,24 +594,97 @@ periodHistory.addEventListener("click", (event) => {
 
   if (!button) return;
 
-  const confirmed = window.confirm(
-    "Are you sure you want to delete this period record?"
-  );
+  if (!window.confirm("Are you sure you want to delete this period record?")) {
+    return;
+  }
 
-  if (!confirmed) return;
-
-  const periods = getSavedPeriods().filter(
+  const remainingPeriods = getSavedPeriods().filter(
     (period) => period.id !== button.dataset.periodId
   );
 
-  if (savePeriods(periods)) {
+  if (savePeriods(remainingPeriods)) {
     trackingMessage.textContent = "Period record deleted.";
     renderPeriodHistory();
   }
 });
 
-renderPeriodHistory();
-// Register CycleCare's service worker for offline support
+/* SETTINGS */
+
+function loadSettingsIntoForm() {
+  const settings = getSettings();
+
+  lastPeriodInput.value = settings.lastPeriod;
+  cycleLengthInput.value = String(settings.cycleLength);
+  periodLengthInput.value = String(settings.periodLength);
+}
+
+settingsForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+
+  const settings = {
+    lastPeriod: lastPeriodInput.value,
+    cycleLength: Number(cycleLengthInput.value),
+    periodLength: Number(periodLengthInput.value)
+  };
+
+  if (
+    settings.cycleLength < 21 ||
+    settings.cycleLength > 35 ||
+    settings.periodLength < 2 ||
+    settings.periodLength > 10
+  ) {
+    settingsMessage.textContent = "Please check your cycle settings.";
+    return;
+  }
+
+  if (!saveSettings(settings)) {
+    settingsMessage.textContent =
+      "Could not save settings. Please check your browser storage.";
+    return;
+  }
+
+  settingsMessage.textContent = "Your settings have been saved! 🩷";
+
+  updatePredictions();
+  renderCalendar();
+});
+
+/* DATE LABEL */
+
+function updateDateLabel() {
+  const label = $("#today-label");
+
+  if (!label) return;
+
+  label.textContent = new Date().toLocaleDateString("en-GB", {
+    weekday: "long",
+    day: "numeric",
+    month: "long"
+  }).toUpperCase();
+}
+
+/* INITIALIZE APP */
+
+function initializeApp() {
+  updateDateLabel();
+  loadSettingsIntoForm();
+  updatePredictions();
+  renderCalendar();
+  renderPeriodHistory();
+  showPage("home");
+
+  // Keep the existing calendar and saved period history available.
+  const settings = getSettings();
+
+  if (settings.lastPeriod) {
+    lastPeriodInput.value = settings.lastPeriod;
+  }
+}
+
+initializeApp();
+
+/* OFFLINE SUPPORT */
+
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker
