@@ -1,19 +1,26 @@
 {
-  "name": "CycleCare - Period Tracker",
-  "short_name": "CycleCare",
-  "description": "A private menstrual cycle and period tracking app.",
-  "start_url": "./",
-  "scope": "./",
-  "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#fff5f9",
-  "theme_color": "#b83270",
-  "icons": [
-    {
-      "src": "icon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml",
-      "purpose": "any"
-    }
-  ]
+"id": "./",
+"name": "CycleCare — Your Cycle, Your Care",
+"short_name": "CycleCare",
+"description": "CycleCare is a personal menstrual cycle tracker that helps you estimate your next period, ovulation window, and cycle patterns.",
+"start_url": "./",
+"scope": "./",
+"display": "standalone",
+"orientation": "portrait",
+"background_color": "#FFF5F9",
+"theme_color": "#C84D7C",
+"icons": [
+{
+"src": "./icons/launchericon-192x192.png",
+"sizes": "192x192",
+"type": "image/png",
+"purpose": "any"
+},
+{
+"src": "./icons/launchericon-512x512.png",
+"sizes": "512x512",
+"type": "image/png",
+"purpose": "any"
+}
+]
 }
