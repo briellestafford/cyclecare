@@ -343,72 +343,120 @@ function updatePredictions() {
 /* CALENDAR */
 
 function renderCalendar() {
-  const grid = $("#calendar-grid");
-  const heading = $("#calendar-month");
+const grid = $("#calendar-grid");
+const heading = $("#calendar-month");
 
-  if (!grid || !heading) return;
+if (!grid || !heading) return;
 
-  grid.innerHTML = "";
+grid.innerHTML = "";
 
-  heading.textContent = calendarMonth.toLocaleDateString("en-GB", {
-    month: "long",
-    year: "numeric"
-  });
+heading.textContent = calendarMonth.toLocaleDateString("en-GB", {
+month: "long",
+year: "numeric"
+});
 
-  const weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
+const weekdays = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
-  weekdays.forEach((day) => {
-    const element = document.createElement("div");
-    element.className = "weekday";
-    element.textContent = day;
-    grid.appendChild(element);
-  });
+weekdays.forEach((day) => {
+const element = document.createElement("div");
+element.className = "weekday";
+element.textContent = day;
+grid.appendChild(element);
+});
 
-  const year = calendarMonth.getFullYear();
-  const month = calendarMonth.getMonth();
+const year = calendarMonth.getFullYear();
+const month = calendarMonth.getMonth();
 
-  const firstDay = new Date(year, month, 1);
-  const daysInMonth = new Date(year, month + 1, 0).getDate();
+const firstDay = new Date(year, month, 1);
+const daysInMonth = new Date(year, month + 1, 0).getDate();
 
-  // Monday-first calendar.
-  const offset = (firstDay.getDay() + 6) % 7;
+// Monday-first calendar.
+const offset = (firstDay.getDay() + 6) % 7;
 
-  for (let i = 0; i < offset; i++) {
-    const empty = document.createElement("div");
-    empty.className = "calendar-day empty";
-    grid.appendChild(empty);
-  }
-
-  const settings = getPredictionSettings();
-
-  for (let day = 1; day <= daysInMonth; day++) {
-    const date = new Date(year, month, day);
-    date.setHours(12, 0, 0, 0);
-
-    const element = document.createElement("div");
-    element.className = "calendar-day";
-    element.textContent = day;
-
-    if (isExpectedPeriodDay(date, settings)) {
-      element.classList.add("expected-period");
-      element.title = "Estimated period day";
-    }
-
-    const today = new Date();
-    today.setHours(12, 0, 0, 0);
-
-    if (sameDay(date, today)) {
-      element.classList.add("today");
-      element.title = element.title
-        ? `${element.title}; Today`
-        : "Today";
-    }
-
-    grid.appendChild(element);
-  }
-
-  renderHomeCalendar();
+for (let i = 0; i < offset; i++) {
+const empty = document.createElement("div");
+empty.className = "calendar-day empty";
+grid.appendChild(empty);
 }
+
+const settings = getPredictionSettings();
+
+// Calculate estimated ovulation and fertile window.
+let ovulationDate = null;
+let fertileStart = null;
+let fertileEnd = null;
+
+if (settings.lastPeriod && settings.cycleLength) {
+const lastPeriod = new Date(settings.lastPeriod + "T12:00:00");
+
+if (!Number.isNaN(lastPeriod.getTime())) {
+  ovulationDate = new Date(lastPeriod);
+  ovulationDate.setDate(
+    ovulationDate.getDate() + Number(settings.cycleLength) - 14
+  );
+
+  fertileStart = new Date(ovulationDate);
+  fertileStart.setDate(fertileStart.getDate() - 5);
+
+  fertileEnd = new Date(ovulationDate);
+  fertileEnd.setDate(fertileEnd.getDate() + 1);
+}
+
+}
+
+const today = new Date();
+today.setHours(12, 0, 0, 0);
+
+for (let day = 1; day <= daysInMonth; day++) {
+const date = new Date(year, month, day);
+date.setHours(12, 0, 0, 0);
+
+const element = document.createElement("div");
+element.className = "calendar-day";
+element.textContent = day;
+
+// Expected period dates.
+if (isExpectedPeriodDay(date, settings)) {
+  element.classList.add("expected-period");
+  element.title = "Estimated period day";
+}
+
+// Estimated fertile window.
+if (
+  fertileStart &&
+  fertileEnd &&
+  date >= fertileStart &&
+  date <= fertileEnd
+) {
+  element.classList.add("fertile-window");
+  element.title = element.title
+    ? `${element.title}; Estimated fertile window`
+    : "Estimated fertile window";
+}
+
+// Estimated ovulation day.
+if (ovulationDate && sameDay(date, ovulationDate)) {
+  element.classList.add("ovulation-day");
+  element.title = element.title
+    ? `${element.title}; Estimated ovulation day`
+    : "Estimated ovulation day";
+}
+
+// Today's date.
+if (sameDay(date, today)) {
+  element.classList.add("today");
+  element.title = element.title
+    ? `${element.title}; Today`
+    : "Today";
+}
+grid.appendChild(element);
+grid.appendChild(element);
+
+}
+
+renderHomeCalendar();
+}
+
 
 function renderHomeCalendar() {
   const grid = $("#home-calendar");
